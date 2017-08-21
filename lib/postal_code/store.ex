@@ -17,6 +17,7 @@ defmodule ElhexDelivery.PostalCode.Store do
   # Callbacks
   def handle_call({:get_geolocation, postal_code}, _from, geolocation_data) do
     geolocation = Map.get(geolocation_data, postal_code)
+    
     {:reply, geolocation, geolocation_data}
   end
 

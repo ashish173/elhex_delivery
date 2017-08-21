@@ -19,10 +19,14 @@ defmodule ElhexDelivery.PostalCode.NavigatorTest do
       assert is_float(distance)
     end
 
+    @tag :capture_log
     test "postal codes arbitrary params" do
-      assert_raise ArgumentError, fn -> 
+      navigator_pid = Process.whereis(:postal_code_navigator)
+      reference = Process.monitor(navigator_pid)
+      catch_exit do
         Navigator.get_distance("13054", 16659.344)
       end
+      assert_received({:DOWN, ^reference, :process, ^navigator_pid, {%ArgumentError{}, _}})
     end
   end
 
