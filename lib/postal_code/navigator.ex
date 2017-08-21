@@ -1,5 +1,10 @@
 defmodule ElhexDelivery.PostalCode.Navigator do
-  
+  alias :math, as: Math
+  alias ElhexDelivery.PostalCode.Store
+
+  # @radius 6371 #km
+  @radius 3959 #miles
+
   def get_distance(from, to) do
     do_get_distance(from, to)
   end
@@ -13,7 +18,7 @@ defmodule ElhexDelivery.PostalCode.Navigator do
 
   # For string input
   defp get_geolocation(postal_code) when is_binary(postal_code) do
-    {123, 456}
+    Store.get_geolocation(postal_code)
   end
 
   # For integer input
@@ -28,9 +33,29 @@ defmodule ElhexDelivery.PostalCode.Navigator do
     raise ArgumentError, error
   end
 
+  # Confession: I don't understand anything in this method
+  # It's a copy paste
   defp calculate_distance({lat1, long1}, {lat2, long2}) do
-    # Math...
-    22.95
+    lat_diff = degrees_to_radians(lat2 - lat1)
+    long_diff = degrees_to_radians(long2 - long1)
+
+    lat1 = degrees_to_radians(lat1)
+    lat2 = degrees_to_radians(lat2)
+
+    cos_lat_1 = Math.cos(lat1)
+    cos_lat_2 = Math.cos(lat2)
+
+    sin_lat_diff_sq = Math.sin(lat_diff / 2) |> Math.pow(2)
+    sin_long_diff_sq = Math.sin(long_diff / 2) |> Math.pow(2)
+
+    a = sin_lat_diff_sq + (cos_lat_1 * cos_lat_2 * sin_long_diff_sq)
+    c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+    @radius * c |> Float.round(2)
+  end
+
+  defp degrees_to_radians(degrees) do
+    degrees * (Math.pi / 180)
   end
 
 end
